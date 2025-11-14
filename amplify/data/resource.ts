@@ -1,5 +1,4 @@
 import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
-import { postConfirmation } from '../auth/post-confirmation/resource';
 
 const schema = a.schema({
   UserProfile: a
@@ -9,7 +8,8 @@ const schema = a.schema({
     })
     .authorization((allow) => [
       allow.ownerDefinedIn('profileOwner'),
-      allow.resource(postConfirmation)
+      allow.authenticated().to(['read']),
+      allow.guest().to(['read'])
     ]),
 });
 
