@@ -1,34 +1,50 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useState, useEffect } from 'react'
+import { Amplify } from 'aws-amplify'
+import { generateClient } from 'aws-amplify/data'
+import { useAuthenticator } from '@aws-amplify/ui-react'
+import '@aws-amplify/ui-react/styles.css'
+import outputs from '../amplify_outputs.json'
 import './App.css'
 
+Amplify.configure(outputs)
+const client = generateClient({ authMode: 'userPool' })
+
 function App() {
-  const [count, setCount] = useState(0)
+  const { signOut, user } = useAuthenticator()
+  const [userProfile, setUserProfile] = useState(null)
+
+  useEffect(() => {
+    if (user) {
+      fetchUserProfile()
+    }
+  }, [user])
+
+  async function fetchUserProfile() {
+    try {
+      const { data } = await client.models.UserProfile.list()
+      if (data && data.length > 0) {
+        setUserProfile(data[0])
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error)
+    }
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
+    <div style={{ padding: '20px', textAlign: 'center' }}>
+      <h1>Welcome to Bitisha Shrestha's Profile App</h1>
+      <div style={{ margin: '20px 0', padding: '20px', border: '1px solid #ddd', borderRadius: '8px' }}>
+        <h2>User Information</h2>
+        <p><strong>Username:</strong> {user?.username}</p>
+        <p><strong>Email:</strong> {userProfile?.email || user?.signInDetails?.loginId || 'Loading...'}</p>
+        <p style={{ fontSize: '1.2em', color: '#646cff', marginTop: '20px' }}>
+          <strong>Created by: Bitisha Shrestha</strong>
         </p>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+      <button onClick={signOut} style={{ marginTop: '20px' }}>
+        Sign Out
+      </button>
+    </div>
   )
 }
 
