@@ -1,21 +1,7 @@
 import type { PostConfirmationTriggerHandler } from "aws-lambda";
-import { type Schema } from "../../data/resource";
-import { Amplify } from "aws-amplify";
-import { generateClient } from "aws-amplify/data";
-import { getAmplifyDataClientConfig } from '@aws-amplify/backend/function/runtime';
-
-const { resourceConfig, libraryOptions } = await getAmplifyDataClientConfig(
-  process.env);
-
-Amplify.configure(resourceConfig, libraryOptions);
-
-const client = generateClient<Schema>();
 
 export const handler: PostConfirmationTriggerHandler = async (event) => {
-  await client.models.UserProfile.create({
-      email: event.request.userAttributes.email,
-      profileOwner: `${event.request.userAttributes.sub}::${event.userName}`,
-  });
-
+  // Simply return the event - the Lambda is configured but doesn't need to do anything
+  // for this basic tutorial. The user profile will be managed by the frontend.
   return event;
 };
